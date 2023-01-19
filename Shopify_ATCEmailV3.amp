@@ -1,0 +1,45 @@
+ID: %%ID%%<br>
+Email Address: %%Mail%%<br>
+Shipping Address: %%Ship Address%%<br>
+Customer Details: %%Customer Details%%<br>
+Total Price%: %%Total Price%%<br>
+
+%%[
+var @ID
+set @ID = AttributeValue("ID") 
+]%%
+
+%%[
+set @rows = lookuprows("ShopifyAbandonedCartProductsDE-stgi", "cartID", @ID)
+
+set @rowcount = rowcount(@rows)
+if @rowcount > 0 then
+
+  for @i = 1 to @rowcount do
+
+    set @row = row(@rows, @i) /* get row based on counter */
+    set @cartID_ = field(@row, "cartID")
+    set @ProductID_ = field(@row, "ProductID")
+    if @cartID_ == @ID then
+   /*   ]%% i: %%=v(@i)=%%,ProductID: %%=v(@ProductID_)=%%,CartID: %%=v(@CartID_)=%%<br> %%[ */
+      /*Lookup to ShopifyProductDE-stgi >> */
+      set @rows_2 = lookuprows("ShopifyProductDE-stgi", "ID", @ProductID_)
+      set @rowcount_2 = rowcount(@rows_2)
+      if @rowcount_2 > 0 then
+        for @i_2 = 1 to @rowcount_2 do
+          set @Image_ = field(row(@rows_2, @i_2), "Image")
+          set @Title_ = field(row(@rows_2, @i_2), "Title")
+          set @Price_ = field(row(@rows_2, @i_2), "Price")
+]%%
+          <li>%%=v(@Title_)=%%</li> 
+          <li>%%=v(@Price_)=%%</li> 
+          <li><img src="%%=v(@Image_)=%%" Height="100" Width="100"/></li> 
+%%[
+        next @i_2
+      endif
+    endif
+  next @i
+else
+    ]%% Click Checkout to view Products in your cart. %%[
+endif
+]%%
